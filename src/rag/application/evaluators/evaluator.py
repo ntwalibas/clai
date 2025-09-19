@@ -7,10 +7,9 @@ from dspy.evaluate.evaluate import EvaluationResult
 
 
 class Evaluator:
-    def __init__(self, metric: Callable, display_progress=True, num_threads: int = -1):
+    def __init__(self, metric: Callable, display_progress: bool =True, num_threads: int = -1):
         self._metric = metric
         self._display_progress = display_progress
-        self._executor = None  # Optional, if you want to hold onto it
         if num_threads <= 0:
             self._num_threads = os.cpu_count()
         else:
