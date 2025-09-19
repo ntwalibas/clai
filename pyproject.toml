@@ -1,0 +1,109 @@
+[project]
+name = "clai"
+version = "0.1.0"
+description = "The AI Command Line Interface."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anyio>=4.10.0",
+    "beanie>=2.0.0",
+    "click>=8.1.0",
+    "crawl4ai>=0.7.3",
+    "dspy==3.0.3",
+    "loguru>=0.7.3",
+    "prompt-toolkit>=3.0.51",
+    "pydantic>=2.11.1",
+    "pypandoc>=1.15",
+    "qdrant-client>=1.15.1",
+    "rich>=14.1.0",
+    "sentence-transformers>=5.1.0",
+    "tqdm>=4.67.1",
+    "yaspin>=3.1.0",
+    "zenml[server]==0.85.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.1",
+    "ruff>=0.12.8",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.16",
+]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+src = ["src"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+preview = false
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes errors
+    "I",  # isort (for import sorting)
+    "W",  # pycodestyle warnings
+    "UP", # pyupgrade (suggests modern Python syntax)
+    "B",  # flake8-bugbear (common pitfalls and potential bugs)
+    "C4", # flake8-comprehensions (suggests better list/dict comprehensions)
+]
+ignore = [
+    "E501", # Line too long (often handled by a formatter like Black)
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]  # Ignore all docstring checks in the 'tests' directory
+"docs/*.py" = ["E501"] # Ignore line length in Python files within the 'docs' directory
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "etl", "rag", "shared"]
+combine-as-imports = true
+force-sort-within-sections = true
+order-by-type = true
+case-sensitive = false
