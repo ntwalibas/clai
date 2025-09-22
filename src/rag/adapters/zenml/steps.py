@@ -6,10 +6,11 @@ import dspy
 import mlflow
 from zenml import step
 
-from config import settings
 from rag.application.evaluators.evaluator import Evaluator
 from rag.application.loader import CommandLoader
+from rag.application.modules.plain_rag import PlainRAG
 from rag.application.modules.simple_rag import SimpleRAG
+from rag.application.optimizers.bootstrap_optimizer import BootstrapOptimizer
 from rag.application.parser import DocpageService
 from rag.domain.entities import Command
 from rag.domain.policies.eval_metric import EvalMetric
@@ -20,7 +21,6 @@ from rag.infrastructure.materializers import (
     ListCommandMaterializer,
     ListProgramMaterializer,
 )
-from rag.infrastructure.utils import configure_llm
 
 
 @step(enable_cache=False, output_materializers={"parsed_content": CommandMaterializer})
@@ -53,11 +53,6 @@ def load_commands(
     CommandLoader().load_many(doc_configs, commands)
 
 
-# @step(enable_cache=False)
-# def load_simple_rag_program(command: Command) -> Annotated[dspy.Module, "loaded_program"]:
-#     return SimpleRAG(command, ContextBuilder.build(command), command.trainset)
-
-
 @step(
     enable_cache=False,
     output_materializers={"loaded_programs": ListProgramMaterializer},
@@ -71,12 +66,21 @@ def load_simple_rag_programs(
     ]
 
 
+@step(
+    enable_cache=False,
+    output_materializers={"loaded_programs": ListProgramMaterializer},
+)
+def load_plain_rag_programs(
+    commands: list[Command],
+) -> Annotated[list[dspy.Module], "loaded_programs"]:
+    return [PlainRAG(command, ContextBuilder.build(command)) for command in commands]
+
+
 @step(enable_cache=False, experiment_tracker="mlflow_docker")
 def evaluate_programs(
-    doc_configs: list[dict[str, str]], programs: list[dspy.Module]
+    category: str, doc_configs: list[dict[str, str]], programs: list[dspy.Module]
 ) -> Annotated[list[dict[str, float]], "evaluation_results"]:
     mlflow.dspy.autolog()
-    configure_llm(settings.LLM_NAME, settings.LLM_ENDPOINT)
 
     outputs = []
 
@@ -124,6 +128,26 @@ def evaluate_programs(
                 )
 
     for output in outputs:
-        mlflow.log_metric(f"Unoptimized/{output['command']}/score", output["score"])
+        mlflow.log_metric(f"{category}/{output['command']}/score", output["score"])
 
     return outputs
+
+
+@step(
+    enable_cache=False,
+    experiment_tracker="mlflow_docker",
+    output_materializers={"optimized_programs": ListProgramMaterializer},
+)
+def optimize_programs(
+    programs: list[dspy.Module],
+) -> Annotated[list[dspy.Module], "optimized_programs"]:
+    mlflow.dspy.autolog()
+
+    optimized_programs = []
+
+    metric = EvalMetric()
+    with BootstrapOptimizer(metric, metric_threshold=1.0) as optimizer:
+        for program in programs:
+            optimized_programs.append(optimizer.optimize(program))
+
+    return optimized_programs
