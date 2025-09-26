@@ -4,9 +4,6 @@ from rag.domain.value_objects import CommandInstance
 
 
 class ExactMetric:
-    def __init__(self):
-        self._flags = set()
-
     def __call__(
         self,
         example: dspy.Example,
