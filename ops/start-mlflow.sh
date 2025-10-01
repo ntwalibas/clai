@@ -8,7 +8,7 @@ MLFLOW_DATABASE=${MLFLOW_DATABASE:-mlflow}
 ENCODED_PG_PASSWORD=$(python3 -c "import urllib.parse, os; print(urllib.parse.quote(os.environ['POSTGRES_PASSWORD']))")
 
 # Install Postgres client
-apk add --no-cache postgresql-client || apt-get update && apt-get install -y postgresql-client
+apt-get update && apt-get install -y postgresql-client
 
 # Install psycopg2 for Python + PostgreSQL
 pip install psycopg2-binary
