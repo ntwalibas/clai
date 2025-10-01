@@ -23,7 +23,9 @@ from rag.infrastructure.utils import configure_llm, qdrant_client
 
 if "NU_VERSION" not in os.environ:
     print_formatted_text(
-        "Error: CLAI must be run inside Nushell. Exiting.", fg="red", bold=True
+        HTML(
+            "<ansired><b>Error: CLAI must be run inside Nushell. Exiting.</b></ansired>"
+        )
     )
     sys.exit(1)
 
